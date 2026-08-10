@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rhinestone - Decentralized Job Board on Arc Testnet</title>
+    <script>
+      (function() {
+        ['fetch', 'Headers', 'Request', 'Response', 'FormData'].forEach(function(prop) {
+          try {
+            var val = window[prop];
+            Object.defineProperty(window, prop, {
+              get: function() { return val; },
+              set: function(v) { val = v; },
+              configurable: true,
+              enumerable: true
+            });
+          } catch (e) {
+            // Ignore if property re-definition fails
+          }
+        });
+        if (typeof window.global === 'undefined') {
+          window.global = window;
+        }
+        if (typeof window.process === 'undefined') {
+          window.process = { env: {} };
+        }
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400..800;1,400..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#FDFBD4] text-[#2b1700] antialiased selection:bg-[#d47e30] selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

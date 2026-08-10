@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --font-headline: "Hanken Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-bg-base: #FDFBD4;
+  --color-surface-lowest: #ffffff;
+  --color-surface-low: #fff1e6;
+  --color-surface-container: #ffead8;
+  --color-surface-highest: #ffddba;
+  
+  --color-primary: #914c00;
+  --color-primary-container: #d47e30;
+  --color-primary-fixed: #ffdcc3;
+  --color-primary-fixed-dim: #ffb77e;
+  
+  --color-secondary: #855325;
+  --color-on-surface: #2b1700;
+  --color-on-surface-variant: #544438;
+  --color-outline: #877366;
+  --color-outline-variant: #dac2b2;
+  --color-inverse-surface: #462a05;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: #FDFBD4;
+  color: #2b1700;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headline);
+}
+
+.hover-lift {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px -10px rgba(74, 55, 40, 0.12);
+}
+
+.badge-pop {
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.glow-hover {
+  transition: all 0.3s ease;
+}
+.glow-hover:hover {
+  text-shadow: 0 0 12px rgba(212, 126, 48, 0.8), 0 0 20px rgba(255, 183, 126, 0.5);
+  color: #ffdcc3;
+}
+
