@@ -72,7 +72,7 @@ export const JobDetail: React.FC = () => {
   const shortPoster = `${job.poster.slice(0, 6)}...${job.poster.slice(-4)}`;
 
   const handleApprove = async () => {
-    setStatusMsg({ type: 'info', text: `Approving ${job.tokenSymbol} for Rhinestone contract...` });
+    setStatusMsg({ type: 'info', text: `Approving ${job.tokenSymbol} for Rhinestoone contract...` });
     const res = await approveToken(job.id);
     if (res.success) {
       setNeedsApproval(false);

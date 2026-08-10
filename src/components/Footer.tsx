@@ -8,13 +8,13 @@ export const Footer: React.FC = () => {
         {/* Brand & Disclaimer */}
         <div className="flex flex-col gap-3">
           <div className="font-headline font-bold text-3xl text-[#ffdcc3] tracking-tight">
-            Rhinestone
+            Rhinestoone
           </div>
           <p className="font-body text-sm text-[#ffddba]/80 leading-relaxed max-w-sm">
             High-quality connections through staked applications on Arc Testnet.
           </p>
           <p className="font-body text-xs text-[#ffddba]/50 mt-2">
-            Rhinestone is an independent project built on Arc Testnet.
+            Rhinestoone is an independent project built on Arc Testnet.
           </p>
         </div>
 

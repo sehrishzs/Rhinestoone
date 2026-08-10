@@ -26,7 +26,7 @@ export const Logo: React.FC<LogoProps> = ({ className = '', size = 32 }) => {
         <path d="M90 45 L50 90 L50 45 Z" fill="#b86111" />
       </svg>
       <span className="font-headline font-bold text-2xl tracking-tight text-[#914c00]">
-        Rhinestone
+        Rhinestoone
       </span>
     </div>
   );

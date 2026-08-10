@@ -173,7 +173,7 @@ export const Home: React.FC = () => {
       <section className="max-w-7xl mx-auto px-6 space-y-12">
         <div className="text-center max-w-2xl mx-auto">
           <h2 className="font-headline font-bold text-3xl sm:text-4xl text-[#2b1700] mb-4">
-            How Rhinestone Works
+            How Rhinestoone Works
           </h2>
           <p className="font-body text-sm sm:text-base text-[#544438]">
             An elegant decentralization loop designed to align incentives between job posters and candidates.
@@ -226,7 +226,7 @@ export const Home: React.FC = () => {
             Product Execution Plan
           </span>
           <h2 className="font-headline font-bold text-3xl sm:text-4xl text-[#2b1700] mt-2 mb-4">
-            Rhinestone Roadmap
+            Rhinestoone Roadmap
           </h2>
         </div>
 
@@ -300,7 +300,7 @@ export const Home: React.FC = () => {
             Frequently Asked Questions
           </h2>
           <p className="font-body text-sm text-[#544438]">
-            Everything you need to know about staked job applications on Rhinestone.
+            Everything you need to know about staked job applications on Rhinestoone.
           </p>
         </div>
 

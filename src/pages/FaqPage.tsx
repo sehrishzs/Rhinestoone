@@ -34,7 +34,7 @@ export const FaqPage: React.FC = () => {
           Frequently Asked Questions
         </h1>
         <p className="font-body text-base text-[#544438]">
-          Answers to common questions regarding Rhinestone staked job applications.
+          Answers to common questions regarding Rhinestoone staked job applications.
         </p>
       </div>
 

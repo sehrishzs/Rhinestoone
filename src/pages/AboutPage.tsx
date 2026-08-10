@@ -9,10 +9,10 @@ export const AboutPage: React.FC = () => {
           Decentralized Recruitment Architecture
         </span>
         <h1 className="font-headline font-bold text-4xl sm:text-5xl text-[#2b1700]">
-          About Rhinestone
+          About Rhinestoone
         </h1>
         <p className="font-body text-base text-[#544438] max-w-2xl mx-auto leading-relaxed">
-          Rhinestone solves the Web3 talent acquisition signal problem by requiring economic stakes for job applications on Arc Testnet.
+          Rhinestoone solves the Web3 talent acquisition signal problem by requiring economic stakes for job applications on Arc Testnet.
         </p>
       </div>
 
@@ -26,7 +26,7 @@ export const AboutPage: React.FC = () => {
             In traditional Web3 hiring, job posters are inundated with hundreds of auto-generated, low-quality bot applications. Applicants face no consequence for submitting non-tailored resumes.
           </p>
           <p>
-            <strong>Rhinestone flips this mechanic:</strong>
+            <strong>Rhinestoone flips this mechanic:</strong>
           </p>
           <ul className="list-disc pl-5 space-y-2 text-[#2b1700]">
             <li>
@@ -62,7 +62,7 @@ export const AboutPage: React.FC = () => {
           </div>
           <h3 className="font-headline font-bold text-lg text-[#2b1700]">Non-Custodial Architecture</h3>
           <p className="font-body text-xs text-[#544438] leading-relaxed">
-            All stakes are held by the verified Rhinestone smart contract on Arc Testnet with transparent execution logic.
+            All stakes are held by the verified Rhinestoone smart contract on Arc Testnet with transparent execution logic.
           </p>
         </div>
       </div>

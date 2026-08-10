@@ -1,5 +1,5 @@
 {
-  "name": "Rhinestone",
+  "name": "Rhinestoone",
   "description": "Decentralized job board with staked applications on Arc Testnet.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
