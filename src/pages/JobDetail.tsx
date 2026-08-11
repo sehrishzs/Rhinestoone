@@ -62,7 +62,7 @@ export const JobDetail: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto px-6 py-20 text-center space-y-4">
         <h2 className="font-headline font-bold text-2xl text-[#2b1700]">
-          Job Not Found or Loading...
+          Job Not Found or Loading
         </h2>
         <p className="font-body text-sm text-[#544438]">
           If this is a newly posted job, please ensure it has been confirmed on Arc Testnet.
