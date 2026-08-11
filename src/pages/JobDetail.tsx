@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   Wallet,
   ExternalLink,
@@ -11,6 +10,7 @@ import {
   Lock,
   ArrowLeft,
 } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useContract } from '../context/ContractContext';
 
 export const JobDetail: React.FC = () => {
@@ -32,15 +32,15 @@ export const JobDetail: React.FC = () => {
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   const jobId = id ? BigInt(id) : BigInt(1);
-  const job = jobs.find((j) => j.id === jobId) || jobs[0];
+  const job = jobs.find((j) => j.id === jobId);
 
-  const jobApps = applications.filter((a) => a.jobId === job.id);
+  const jobApps = applications.filter((a) => a.jobId === (job?.id || BigInt(0)));
   const isPoster =
     userAddress && job
       ? job.poster.toLowerCase() === userAddress.toLowerCase()
       : false;
 
-  const hasAlreadyApplied = userAddress
+  const hasAlreadyApplied = userAddress && job
     ? applications.some(
         (a) =>
           a.jobId === job.id &&
@@ -51,7 +51,7 @@ export const JobDetail: React.FC = () => {
 
   // Check ERC20 token approval
   useEffect(() => {
-    if (job) {
+    if (job && userAddress) {
       checkNeedsApproval(job.id).then((res) => {
         setNeedsApproval(res.needsApproval);
       });
@@ -61,8 +61,13 @@ export const JobDetail: React.FC = () => {
   if (!job) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-20 text-center space-y-4">
-        <h2 className="font-headline font-bold text-2xl">Job Not Found</h2>
-        <Link to="/jobs" className="text-[#914c00] underline font-semibold">
+        <h2 className="font-headline font-bold text-2xl text-[#2b1700]">
+          Job Not Found or Loading...
+        </h2>
+        <p className="font-body text-sm text-[#544438]">
+          If this is a newly posted job, please ensure it has been confirmed on Arc Testnet.
+        </p>
+        <Link to="/jobs" className="text-[#914c00] underline font-semibold inline-block pt-2">
           Back to Browse Jobs
         </Link>
       </div>
@@ -129,7 +134,7 @@ export const JobDetail: React.FC = () => {
         <ArrowLeft className="w-4 h-4" /> Back to Jobs
       </Link>
 
-      {/* Header Section (Matching Image 9) */}
+      {/* Header Section */}
       <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-3">
           <h1 className="font-headline font-bold text-3xl sm:text-5xl text-[#2b1700]">
@@ -182,7 +187,7 @@ export const JobDetail: React.FC = () => {
 
         {/* Right Column: Sidebar & Actions */}
         <div className="lg:col-span-4 space-y-6 sticky top-28">
-          {/* Stake Requirement Box (Matching Image 9) */}
+          {/* Stake Requirement Box */}
           <div className="bg-[#fff1e6] border border-[#d47e30] p-6 rounded-2xl text-center shadow-[4px_4px_0px_0px_#D47E30] space-y-2">
             <Wallet className="w-10 h-10 text-[#d47e30] mx-auto mb-1" />
             <h3 className="font-headline font-bold text-xl text-[#2b1700]">
@@ -192,7 +197,7 @@ export const JobDetail: React.FC = () => {
               {job.formattedStake}
             </p>
             <p className="font-body text-xs text-[#544438] pt-1">
-              Required to apply for this position. Stake is returned upon application review.
+              Required to apply for this position. Stake deposit is submitted directly on-chain.
             </p>
           </div>
 
@@ -206,8 +211,17 @@ export const JobDetail: React.FC = () => {
               <div className="p-4 bg-stone-100 rounded-xl text-stone-600 font-body text-xs text-center">
                 This job listing is closed and no longer accepting applications.
               </div>
+            ) : !userAddress ? (
+              <div className="bg-[#ffead8]/40 border border-[#d47e30]/30 rounded-xl p-6 text-center space-y-3">
+                <p className="font-body text-xs text-[#544438]">
+                  Connect your Web3 wallet to apply for this job.
+                </p>
+                <div className="flex justify-center">
+                  <ConnectButton />
+                </div>
+              </div>
             ) : isPoster ? (
-              <div className="p-4 bg-[#ffead8] rounded-xl text-[#472200] font-body text-xs text-center">
+              <div className="p-4 bg-[#ffead8] rounded-xl text-[#472200] font-body text-xs text-center font-medium">
                 You are the poster of this job listing.
               </div>
             ) : hasAlreadyApplied ? (
@@ -278,7 +292,7 @@ export const JobDetail: React.FC = () => {
         </div>
       </section>
 
-      {/* Poster View: Applications Management (Matching Image 9) */}
+      {/* Poster View: Applications Management */}
       <section className="space-y-6 pt-8 border-t border-[#877366]/20">
         <div className="flex justify-between items-center border-b border-[#877366]/15 pb-4">
           <h2 className="font-headline font-bold text-2xl text-[#2b1700]">

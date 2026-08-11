@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { AlertCircle, ExternalLink, Loader2, ArrowRight } from 'lucide-react';
+import { AlertCircle, ExternalLink, Loader2, ArrowRight, Wallet } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useContract } from '../context/ContractContext';
 
 export const PersonalDashboard: React.FC = () => {
@@ -17,15 +18,44 @@ export const PersonalDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'applications' | 'postings'>('applications');
   const [withdrawStatus, setWithdrawStatus] = useState<string | null>(null);
 
-  // Filter user applications or show seed applications if wallet is disconnected
-  const currentAddress = userAddress || '0x1230000000000000000000000000000000004567';
+  if (!userAddress) {
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-16 space-y-8">
+        <div className="text-center max-w-xl mx-auto space-y-3">
+          <h1 className="font-headline font-bold text-4xl text-[#2b1700]">
+            Your Activity
+          </h1>
+          <p className="font-body text-base text-[#544438]">
+            Manage your staked job applications and active job postings.
+          </p>
+        </div>
+
+        <div className="bg-white border border-[#877366]/20 rounded-2xl p-12 text-center max-w-md mx-auto space-y-6 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-[#ffead8] text-[#914c00] flex items-center justify-center mx-auto">
+            <Wallet className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-headline font-bold text-2xl text-[#2b1700]">
+              Connect Wallet to Continue
+            </h2>
+            <p className="font-body text-sm text-[#544438]">
+              Connect your Web3 wallet to view your submitted applications and posted job listings on Arc Testnet.
+            </p>
+          </div>
+          <div className="flex justify-center pt-2">
+            <ConnectButton />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const myApps = applications.filter(
-    (a) => a.applicant.toLowerCase() === currentAddress.toLowerCase() || !userAddress
+    (a) => a.applicant.toLowerCase() === userAddress.toLowerCase()
   );
 
   const myPostings = jobs.filter(
-    (j) => j.poster.toLowerCase() === currentAddress.toLowerCase() || !userAddress
+    (j) => j.poster.toLowerCase() === userAddress.toLowerCase()
   );
 
   const handleWithdraw = async (appId: bigint) => {
@@ -40,7 +70,6 @@ export const PersonalDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 space-y-10">
-      {/* Header & Tabs (Matching Image 11) */}
       <div className="space-y-6">
         <h1 className="font-headline font-bold text-4xl sm:text-5xl text-[#2b1700]">
           Your Activity
@@ -53,7 +82,7 @@ export const PersonalDashboard: React.FC = () => {
               activeTab === 'applications' ? 'text-[#914c00]' : 'text-[#544438] hover:text-[#914c00]'
             }`}
           >
-            My Applications
+            My Applications ({myApps.length})
             {activeTab === 'applications' && (
               <motion.div
                 layoutId="activeTabIndicator"
@@ -68,7 +97,7 @@ export const PersonalDashboard: React.FC = () => {
               activeTab === 'postings' ? 'text-[#914c00]' : 'text-[#544438] hover:text-[#914c00]'
             }`}
           >
-            My Job Postings
+            My Job Postings ({myPostings.length})
             {activeTab === 'postings' && (
               <motion.div
                 layoutId="activeTabIndicator"
@@ -86,13 +115,13 @@ export const PersonalDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* My Applications View (Matching Image 11) */}
+      {/* My Applications View */}
       {activeTab === 'applications' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {myApps.length > 0 ? (
             myApps.map((app, idx) => {
               const job = jobs.find((j) => j.id === app.jobId);
-              const jobTitle = app.jobTitle || job?.title || 'Smart Contract Role';
+              const jobTitle = app.jobTitle || job?.title || 'Job Position';
 
               return (
                 <motion.div

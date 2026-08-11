@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAccount, useReadContract, useWriteContract, usePublicClient } from 'wagmi';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAccount, useWriteContract, usePublicClient } from 'wagmi';
 import { formatUnits, parseUnits } from 'viem';
 import { Job, Application, PlatformStats } from '../types';
 import { RHINESTONE_CONTRACT_ADDRESS, RHINESTONE_ABI, ERC20_ABI, TOKENS } from '../config/contract';
@@ -49,156 +49,155 @@ interface ContractContextType {
 
 const ContractContext = createContext<ContractContextType | undefined>(undefined);
 
-const SEED_JOBS: Job[] = [
-  {
-    id: BigInt(1),
-    poster: '0x71C39129f1e84C32128912345678901234563912',
-    title: 'Senior Smart Contract Engineer',
-    description:
-      'We are seeking a seasoned Smart Contract Engineer to lead the architecture and implementation of our next-generation decentralized protocols. You will be responsible for designing secure, efficient, and scalable smart contracts that power the core mechanics of our platform.\n\n### Responsibilities\n- Design, implement, and deploy robust Solidity smart contracts.\n- Conduct rigorous internal code reviews and security audits.\n- Collaborate closely with frontend engineers to integrate web3 functionality.\n- Research and implement novel cryptographic primitives and scaling solutions.\n\n### Requirements\n- 3+ years of production experience writing Solidity smart contracts.\n- Deep understanding of the EVM, gas optimization, and smart contract security best practices.\n- Experience with modern development frameworks (Foundry, Hardhat).\n- Strong communication skills and ability to work autonomously in a remote environment.',
-    stakeToken: TOKENS.ARC.address,
-    tokenSymbol: 'ARC',
-    tokenDecimals: 18,
-    applicationStake: parseUnits('50', 18),
-    formattedStake: '50 ARC',
-    isOpen: true,
-    applicantCount: 12,
-    createdAt: Date.now() - 86400000 * 3,
-  },
-  {
-    id: BigInt(2),
-    poster: '0x7b919283726a11029482710492822c4d',
-    title: 'Frontend Web3 Developer',
-    description:
-      'Join our frontend team to build seamless user experiences for interacting with our decentralized exchange. React, Ethers.js/Viem required.\n\n### Responsibilities\n- Develop responsive dApp user interfaces with Tailwind CSS and Framer Motion.\n- Connect frontend with EVM smart contracts via Wagmi and Viem.\n- Ensure cross-browser compatibility and high performance.\n\n### Requirements\n- 2+ years dApp frontend experience.\n- Proficient in TypeScript, React, and Web3 libraries.',
-    stakeToken: TOKENS.USDC.address,
-    tokenSymbol: 'USDC',
-    tokenDecimals: 6,
-    applicationStake: parseUnits('250', 6),
-    formattedStake: '250 USDC',
-    isOpen: true,
-    applicantCount: 8,
-    createdAt: Date.now() - 86400000 * 2,
-  },
-  {
-    id: BigInt(3),
-    poster: '0x1f319283711928471029384719288a9b',
-    title: 'Community Manager',
-    description:
-      'Grow and nurture our Discord community. Organize AMAs, manage moderators, and create engaging content for our token holders.\n\n### Responsibilities\n- Lead daily community engagement on Discord and X.\n- Coordinate community events and feedback loops.\n\n### Requirements\n- Experience managing Web3 communities.',
-    stakeToken: TOKENS.ARC.address,
-    tokenSymbol: 'ARC',
-    tokenDecimals: 18,
-    applicationStake: parseUnits('100', 18),
-    formattedStake: '100 ARC',
-    isOpen: false,
-    applicantCount: 5,
-    createdAt: Date.now() - 86400000 * 10,
-  },
-  {
-    id: BigInt(4),
-    poster: '0x0000000000000000000000000000000000000001',
-    title: 'DeFi Protocol Researcher',
-    description:
-      'Conduct deep quantitative research on AMM bonding curves, lending protocol liquidation dynamics, and cross-chain messaging security.\n\n### Requirements\n- Strong mathematical background.\n- Experience modeling tokenomics in Python or Julia.',
-    stakeToken: TOKENS.ARC.address,
-    tokenSymbol: 'ARC',
-    tokenDecimals: 18,
-    applicationStake: parseUnits('25', 18),
-    formattedStake: '25 ARC',
-    isOpen: true,
-    applicantCount: 4,
-    createdAt: Date.now() - 86400000 * 1,
-  },
-];
-
-const SEED_APPLICATIONS: Application[] = [
-  {
-    id: BigInt(101),
-    jobId: BigInt(1),
-    applicant: '0xa11ce00000000000000000000000000000000001',
-    profileLink: 'github.com/alice-dev',
-    isShortlisted: false,
-    isWithdrawn: false,
-    stakedAmount: parseUnits('50', 18),
-    stakeToken: TOKENS.ARC.address,
-    tokenSymbol: 'ARC',
-    tokenDecimals: 18,
-    formattedStake: '50 ARC',
-    appliedAt: Date.now() - 86400000 * 2,
-    jobTitle: 'Senior Smart Contract Engineer',
-  },
-  {
-    id: BigInt(102),
-    jobId: BigInt(1),
-    applicant: '0xb0b0000000000000000000000000000000000002',
-    profileLink: 'linkedin.com/in/bob-smith',
-    isShortlisted: true,
-    isWithdrawn: false,
-    stakedAmount: parseUnits('50', 18),
-    stakeToken: TOKENS.ARC.address,
-    tokenSymbol: 'ARC',
-    tokenDecimals: 18,
-    formattedStake: '50 ARC',
-    appliedAt: Date.now() - 86400000 * 3,
-    jobTitle: 'Senior Smart Contract Engineer',
-  },
-  {
-    id: BigInt(103),
-    jobId: BigInt(4),
-    applicant: '0x1230000000000000000000000000000000004567',
-    profileLink: 'x.com/defi_researcher',
-    isShortlisted: false,
-    isWithdrawn: false,
-    stakedAmount: parseUnits('25', 18),
-    stakeToken: TOKENS.ARC.address,
-    tokenSymbol: 'ARC',
-    tokenDecimals: 18,
-    formattedStake: '25 ARC',
-    appliedAt: Date.now() - 86400000 * 1,
-    jobTitle: 'DeFi Protocol Researcher',
-  },
-];
-
 export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const publicClient = usePublicClient();
   const { writeContractAsync } = useWriteContract();
 
-  const [jobs, setJobs] = useState<Job[]>(SEED_JOBS);
-  const [applications, setApplications] = useState<Application[]>(SEED_APPLICATIONS);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [stakeRefundEnabled, setStakeRefundEnabled] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPendingTx, setIsPendingTx] = useState<boolean>(false);
 
-  // Read platform stats from live contract if deployed
-  const { data: rawStats, refetch: refetchStats } = useReadContract({
-    address: RHINESTONE_CONTRACT_ADDRESS,
-    abi: RHINESTONE_ABI,
-    functionName: 'getPlatformStats',
-    query: {
-      enabled: !!RHINESTONE_CONTRACT_ADDRESS,
-      retry: false,
-    },
-  });
+  // Fetch all real contract data
+  const fetchAllData = useCallback(async () => {
+    if (!publicClient) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const statsData = (await publicClient.readContract({
+        address: RHINESTONE_CONTRACT_ADDRESS,
+        abi: RHINESTONE_ABI,
+        functionName: 'getPlatformStats',
+      })) as [bigint, bigint, bigint, boolean];
+
+      const [totalJobsBig, , , refundPolicy] = statsData;
+      setStakeRefundEnabled(Boolean(refundPolicy));
+
+      const totalJobsCount = Number(totalJobsBig);
+      if (totalJobsCount === 0) {
+        setJobs([]);
+        setApplications([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const fetchedJobs: Job[] = [];
+      const fetchedApps: Application[] = [];
+
+      for (let i = 1; i <= totalJobsCount; i++) {
+        try {
+          const jobData = (await publicClient.readContract({
+            address: RHINESTONE_CONTRACT_ADDRESS,
+            abi: RHINESTONE_ABI,
+            functionName: 'getJob',
+            args: [BigInt(i)],
+          })) as any;
+
+          if (!jobData) continue;
+
+          const id = jobData.id !== undefined ? BigInt(jobData.id) : BigInt(i);
+          const poster = jobData.poster;
+          const title = jobData.title || '';
+          const description = jobData.description || '';
+          const stakeToken = jobData.stakeToken;
+          const applicationStake = BigInt(jobData.applicationStake || 0);
+          const isOpen = Boolean(jobData.isOpen);
+          const createdAt = Number(jobData.createdAt) * 1000 || Date.now();
+
+          let tokenSymbol = 'ARC';
+          let tokenDecimals = 18;
+
+          const matchedToken = Object.values(TOKENS).find(
+            (t) => t.address.toLowerCase() === stakeToken.toLowerCase()
+          );
+          if (matchedToken) {
+            tokenSymbol = matchedToken.symbol;
+            tokenDecimals = matchedToken.decimals;
+          }
+
+          const formattedStakeVal = formatUnits(applicationStake, tokenDecimals);
+          const formattedStake = `${formattedStakeVal} ${tokenSymbol}`;
+
+          let jobAppsData: any[] = [];
+          try {
+            jobAppsData = (await publicClient.readContract({
+              address: RHINESTONE_CONTRACT_ADDRESS,
+              abi: RHINESTONE_ABI,
+              functionName: 'getApplicationsForJob',
+              args: [id],
+            })) as any[];
+          } catch (e) {
+            console.warn(`Could not fetch applications for job ${id}`, e);
+          }
+
+          fetchedJobs.push({
+            id,
+            poster,
+            title,
+            description,
+            stakeToken,
+            tokenSymbol,
+            tokenDecimals,
+            applicationStake,
+            formattedStake,
+            isOpen,
+            applicantCount: jobAppsData.length,
+            createdAt,
+          });
+
+          for (const appItem of jobAppsData) {
+            fetchedApps.push({
+              id: BigInt(appItem.id),
+              jobId: BigInt(appItem.jobId || id),
+              applicant: appItem.applicant,
+              profileLink: appItem.profileLink,
+              isShortlisted: Boolean(appItem.isShortlisted),
+              isWithdrawn: Boolean(appItem.isWithdrawn),
+              stakedAmount: applicationStake,
+              stakeToken,
+              tokenSymbol,
+              tokenDecimals,
+              formattedStake,
+              appliedAt: Number(appItem.appliedAt) * 1000 || Date.now(),
+              jobTitle: title,
+            });
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch job ${i}:`, err);
+        }
+      }
+
+      setJobs(fetchedJobs);
+      setApplications(fetchedApps);
+    } catch (err) {
+      console.warn('Error reading from contract on Arc Testnet:', err);
+      setJobs([]);
+      setApplications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [publicClient]);
 
   useEffect(() => {
-    if (rawStats && Array.isArray(rawStats) && rawStats.length >= 4) {
-      const refundPolicy = Boolean(rawStats[3]);
-      setStakeRefundEnabled(refundPolicy);
-    }
-  }, [rawStats]);
+    fetchAllData();
+  }, [fetchAllData]);
 
   const activeJobs = jobs.filter((j) => j.isOpen).length;
   const stats: PlatformStats = {
     totalJobs: jobs.length,
     activeJobs,
-    totalApplications: jobs.reduce((acc, j) => acc + j.applicantCount, 0),
-    totalStakedUSD: '$12,450',
+    totalApplications: applications.length,
+    totalStakedUSD: `${applications.length} Staked Applications`,
     stakeRefundEnabled,
   };
 
   const refetchData = () => {
-    refetchStats();
+    fetchAllData();
   };
 
   // Helper to check if ERC20 allowance is sufficient
@@ -237,7 +236,6 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           required: job.applicationStake,
         };
       } catch {
-        // Fallback check
         return { needsApproval: false, allowance: job.applicationStake, required: job.applicationStake };
       }
     }
@@ -263,11 +261,12 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return { success: true, hash };
       }
     } catch (err: any) {
-      console.warn('On-chain approve fallback:', err);
+      setIsPendingTx(false);
+      return { success: false, error: err.message || 'Approval failed' };
     }
 
     setIsPendingTx(false);
-    return { success: true, hash: '0xmock_approve_tx_hash' };
+    return { success: false, error: 'Wallet not ready' };
   };
 
   // Post a job
@@ -291,49 +290,17 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           args: [title, description, tokenInfo.address, applicationStake],
         });
 
-        // Add local job for immediate responsive feedback
-        const newJob: Job = {
-          id: BigInt(jobs.length + 1),
-          poster: address || '0x1230000000000000000000000000000000004567',
-          title,
-          description,
-          stakeToken: tokenInfo.address,
-          tokenSymbol,
-          tokenDecimals: decimals,
-          applicationStake,
-          formattedStake: `${stakeAmountStr} ${tokenSymbol}`,
-          isOpen: true,
-          applicantCount: 0,
-          createdAt: Date.now(),
-        };
-
-        setJobs((prev) => [newJob, ...prev]);
         setIsPendingTx(false);
+        setTimeout(() => fetchAllData(), 2000);
         return { success: true, hash };
       }
     } catch (err: any) {
-      console.warn('On-chain postJob fallback:', err);
+      setIsPendingTx(false);
+      return { success: false, error: err.message || 'Failed to post job' };
     }
 
-    // Fallback/Simulated local state update for smooth dApp testing
-    const newJob: Job = {
-      id: BigInt(jobs.length + 1),
-      poster: address || '0x1230000000000000000000000000000000004567',
-      title,
-      description,
-      stakeToken: tokenInfo.address,
-      tokenSymbol,
-      tokenDecimals: decimals,
-      applicationStake,
-      formattedStake: `${stakeAmountStr} ${tokenSymbol}`,
-      isOpen: true,
-      applicantCount: 0,
-      createdAt: Date.now(),
-    };
-
-    setJobs((prev) => [newJob, ...prev]);
     setIsPendingTx(false);
-    return { success: true, hash: '0xmock_post_job_tx_hash' };
+    return { success: false, error: 'Wallet not connected' };
   };
 
   // Close job
@@ -347,21 +314,18 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           functionName: 'closeJob',
           args: [jobId],
         });
-        setJobs((prev) =>
-          prev.map((j) => (j.id === jobId ? { ...j, isOpen: false } : j))
-        );
+
         setIsPendingTx(false);
+        setTimeout(() => fetchAllData(), 2000);
         return { success: true, hash };
       }
     } catch (err: any) {
-      console.warn('On-chain closeJob fallback:', err);
+      setIsPendingTx(false);
+      return { success: false, error: err.message || 'Failed to close job' };
     }
 
-    setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? { ...j, isOpen: false } : j))
-    );
     setIsPendingTx(false);
-    return { success: true, hash: '0xmock_close_job_tx_hash' };
+    return { success: false, error: 'Wallet not connected' };
   };
 
   // Apply to Job
@@ -369,10 +333,12 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const job = jobs.find((j) => j.id === jobId);
     if (!job) return { success: false, error: 'Job not found' };
 
-    const currentApplicant = address || '0x1230000000000000000000000000000000004567';
+    if (!address) {
+      return { success: false, error: 'Please connect your wallet to apply.' };
+    }
 
     // Revert if user is job poster
-    if (address && job.poster.toLowerCase() === address.toLowerCase()) {
+    if (job.poster.toLowerCase() === address.toLowerCase()) {
       return { success: false, error: 'Job poster cannot apply to their own job.' };
     }
 
@@ -380,7 +346,7 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const existing = applications.find(
       (a) =>
         a.jobId === jobId &&
-        a.applicant.toLowerCase() === currentApplicant.toLowerCase() &&
+        a.applicant.toLowerCase() === address.toLowerCase() &&
         !a.isWithdrawn
     );
     if (existing) {
@@ -403,55 +369,17 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           value: isNative ? job.applicationStake : BigInt(0),
         });
 
-        const newApp: Application = {
-          id: BigInt(Date.now()),
-          jobId,
-          applicant: currentApplicant,
-          profileLink,
-          isShortlisted: false,
-          isWithdrawn: false,
-          stakedAmount: job.applicationStake,
-          stakeToken: job.stakeToken,
-          tokenSymbol: job.tokenSymbol,
-          tokenDecimals: job.tokenDecimals,
-          formattedStake: job.formattedStake,
-          appliedAt: Date.now(),
-          jobTitle: job.title,
-        };
-
-        setApplications((prev) => [newApp, ...prev]);
-        setJobs((prev) =>
-          prev.map((j) => (j.id === jobId ? { ...j, applicantCount: j.applicantCount + 1 } : j))
-        );
         setIsPendingTx(false);
+        setTimeout(() => fetchAllData(), 2000);
         return { success: true, hash };
       }
     } catch (err: any) {
-      console.warn('On-chain applyToJob fallback:', err);
+      setIsPendingTx(false);
+      return { success: false, error: err.message || 'Failed to apply' };
     }
 
-    const newApp: Application = {
-      id: BigInt(Date.now()),
-      jobId,
-      applicant: currentApplicant,
-      profileLink,
-      isShortlisted: false,
-      isWithdrawn: false,
-      stakedAmount: job.applicationStake,
-      stakeToken: job.stakeToken,
-      tokenSymbol: job.tokenSymbol,
-      tokenDecimals: job.tokenDecimals,
-      formattedStake: job.formattedStake,
-      appliedAt: Date.now(),
-      jobTitle: job.title,
-    };
-
-    setApplications((prev) => [newApp, ...prev]);
-    setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? { ...j, applicantCount: j.applicantCount + 1 } : j))
-    );
     setIsPendingTx(false);
-    return { success: true, hash: '0xmock_apply_tx_hash' };
+    return { success: false, error: 'Wallet not connected' };
   };
 
   // Shortlist applicant
@@ -465,21 +393,18 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           functionName: 'shortlistApplicant',
           args: [applicationId],
         });
-        setApplications((prev) =>
-          prev.map((a) => (a.id === applicationId ? { ...a, isShortlisted: true } : a))
-        );
+
         setIsPendingTx(false);
+        setTimeout(() => fetchAllData(), 2000);
         return { success: true, hash };
       }
     } catch (err: any) {
-      console.warn('On-chain shortlist fallback:', err);
+      setIsPendingTx(false);
+      return { success: false, error: err.message || 'Failed to shortlist applicant' };
     }
 
-    setApplications((prev) =>
-      prev.map((a) => (a.id === applicationId ? { ...a, isShortlisted: true } : a))
-    );
     setIsPendingTx(false);
-    return { success: true, hash: '0xmock_shortlist_tx_hash' };
+    return { success: false, error: 'Wallet not connected' };
   };
 
   // Withdraw stake
@@ -500,21 +425,18 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           functionName: 'withdrawStake',
           args: [applicationId],
         });
-        setApplications((prev) =>
-          prev.map((a) => (a.id === applicationId ? { ...a, isWithdrawn: true } : a))
-        );
+
         setIsPendingTx(false);
+        setTimeout(() => fetchAllData(), 2000);
         return { success: true, hash };
       }
     } catch (err: any) {
-      console.warn('On-chain withdraw fallback:', err);
+      setIsPendingTx(false);
+      return { success: false, error: err.message || 'Failed to withdraw stake' };
     }
 
-    setApplications((prev) =>
-      prev.map((a) => (a.id === applicationId ? { ...a, isWithdrawn: true } : a))
-    );
     setIsPendingTx(false);
-    return { success: true, hash: '0xmock_withdraw_tx_hash' };
+    return { success: false, error: 'Wallet not connected' };
   };
 
   // Admin policy toggle
@@ -528,17 +450,19 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           functionName: 'setStakeRefundPolicy',
           args: [enabled],
         });
+
         setStakeRefundEnabled(enabled);
         setIsPendingTx(false);
+        setTimeout(() => fetchAllData(), 2000);
         return { success: true, hash };
       }
     } catch (err: any) {
-      console.warn('On-chain setRefundPolicy fallback:', err);
+      setIsPendingTx(false);
+      return { success: false, error: err.message || 'Failed to update refund policy' };
     }
 
-    setStakeRefundEnabled(enabled);
     setIsPendingTx(false);
-    return { success: true, hash: '0xmock_policy_tx_hash' };
+    return { success: false, error: 'Wallet not connected' };
   };
 
   return (
@@ -548,7 +472,7 @@ export const ContractProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         applications,
         stats,
         stakeRefundEnabled,
-        isLoading: false,
+        isLoading,
         isPendingTx,
         userAddress: address,
         postJob,

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useContract } from '../context/ContractContext';
+import { ADMIN_WALLET_ADDRESS } from '../config/contract';
 
 interface AdminModalProps {
   isOpen: boolean;
@@ -9,10 +11,12 @@ interface AdminModalProps {
 }
 
 export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
-  const { stakeRefundEnabled, setStakeRefundPolicy, isPendingTx } = useContract();
+  const { stakeRefundEnabled, setStakeRefundPolicy, isPendingTx, userAddress } = useContract();
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const isAdmin = userAddress && userAddress.toLowerCase() === ADMIN_WALLET_ADDRESS.toLowerCase();
 
   const handleToggle = async (newValue: boolean) => {
     setStatusMsg(null);
@@ -54,67 +58,85 @@ export const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <div className="bg-white border border-[#877366]/15 rounded-xl p-4 mb-6 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-headline font-semibold text-xs uppercase tracking-wider text-[#544438]">
-                Current Policy Status:
-              </span>
-              <span
-                className={`px-2.5 py-1 rounded font-headline font-bold text-xs ${
-                  stakeRefundEnabled
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-amber-100 text-amber-800'
-                }`}
-              >
-                {stakeRefundEnabled ? 'Refundable to Applicants' : 'Non-Refundable (Platform Fee)'}
-              </span>
+          {!isAdmin ? (
+            <div className="bg-white border border-[#877366]/15 rounded-xl p-6 text-center space-y-4">
+              <div className="space-y-1">
+                <h3 className="font-headline font-bold text-base text-[#2b1700]">
+                  Admin Wallet Required
+                </h3>
+                <p className="font-body text-xs text-[#544438] leading-relaxed">
+                  Only the platform admin wallet (<span className="font-mono font-semibold text-[#914c00] text-[11px] break-all">{ADMIN_WALLET_ADDRESS}</span>) can toggle global stake refund policies.
+                </p>
+              </div>
+              <div className="flex justify-center pt-2">
+                <ConnectButton />
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="bg-white border border-[#877366]/15 rounded-xl p-4 mb-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-headline font-semibold text-xs uppercase tracking-wider text-[#544438]">
+                    Current Policy Status:
+                  </span>
+                  <span
+                    className={`px-2.5 py-1 rounded font-headline font-bold text-xs ${
+                      stakeRefundEnabled
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-amber-100 text-amber-800'
+                    }`}
+                  >
+                    {stakeRefundEnabled ? 'Refundable to Applicants' : 'Non-Refundable (Platform Fee)'}
+                  </span>
+                </div>
 
-            <p className="font-body text-xs text-[#544438] leading-relaxed">
-              This single global policy dictates whether applicants can call <code className="bg-stone-100 px-1 py-0.5 rounded font-mono">withdrawStake()</code> on "My Applications" page.
-            </p>
-          </div>
+                <p className="font-body text-xs text-[#544438] leading-relaxed">
+                  This single global policy dictates whether applicants can call <code className="bg-stone-100 px-1 py-0.5 rounded font-mono">withdrawStake()</code> on "My Applications" page.
+                </p>
+              </div>
 
-          <div className="space-y-3">
-            <button
-              onClick={() => handleToggle(true)}
-              disabled={isPendingTx || stakeRefundEnabled}
-              className={`w-full py-3 px-4 rounded-lg font-headline font-semibold text-xs flex items-center justify-between border transition-all ${
-                stakeRefundEnabled
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-800 cursor-default'
-                  : 'border-[#877366]/30 bg-white text-[#2b1700] hover:bg-emerald-50/60'
-              }`}
-            >
-              <span>Enable Refundable Stakes</span>
-              {stakeRefundEnabled ? <Check className="w-4 h-4 text-emerald-600" /> : null}
-            </button>
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleToggle(true)}
+                  disabled={isPendingTx || stakeRefundEnabled}
+                  className={`w-full py-3 px-4 rounded-lg font-headline font-semibold text-xs flex items-center justify-between border transition-all ${
+                    stakeRefundEnabled
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-800 cursor-default'
+                      : 'border-[#877366]/30 bg-white text-[#2b1700] hover:bg-emerald-50/60'
+                  }`}
+                >
+                  <span>Enable Refundable Stakes</span>
+                  {stakeRefundEnabled ? <Check className="w-4 h-4 text-emerald-600" /> : null}
+                </button>
 
-            <button
-              onClick={() => handleToggle(false)}
-              disabled={isPendingTx || !stakeRefundEnabled}
-              className={`w-full py-3 px-4 rounded-lg font-headline font-semibold text-xs flex items-center justify-between border transition-all ${
-                !stakeRefundEnabled
-                  ? 'border-amber-500 bg-amber-50 text-amber-900 cursor-default'
-                  : 'border-[#877366]/30 bg-white text-[#2b1700] hover:bg-amber-50/60'
-              }`}
-            >
-              <span>Disable Refundable Stakes (Keep as Platform Fee)</span>
-              {!stakeRefundEnabled ? <Check className="w-4 h-4 text-amber-600" /> : null}
-            </button>
-          </div>
+                <button
+                  onClick={() => handleToggle(false)}
+                  disabled={isPendingTx || !stakeRefundEnabled}
+                  className={`w-full py-3 px-4 rounded-lg font-headline font-semibold text-xs flex items-center justify-between border transition-all ${
+                    !stakeRefundEnabled
+                      ? 'border-amber-500 bg-amber-50 text-amber-900 cursor-default'
+                      : 'border-[#877366]/30 bg-white text-[#2b1700] hover:bg-amber-50/60'
+                  }`}
+                >
+                  <span>Disable Refundable Stakes (Keep as Platform Fee)</span>
+                  {!stakeRefundEnabled ? <Check className="w-4 h-4 text-amber-600" /> : null}
+                </button>
+              </div>
 
-          {statusMsg && (
-            <div className="mt-4 p-3 bg-[#ffead8] text-[#472200] rounded-lg text-xs font-medium flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-[#d47e30]" />
-              <span>{statusMsg}</span>
-            </div>
-          )}
+              {statusMsg && (
+                <div className="mt-4 p-3 bg-[#ffead8] text-[#472200] rounded-lg text-xs font-medium flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-[#d47e30]" />
+                  <span>{statusMsg}</span>
+                </div>
+              )}
 
-          {isPendingTx && (
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-[#914c00]">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Updating policy on Arc Testnet...</span>
-            </div>
+              {isPendingTx && (
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-[#914c00]">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Updating policy on Arc Testnet...</span>
+                </div>
+              )}
+            </>
           )}
 
           <div className="mt-6 pt-4 border-t border-[#877366]/15 flex justify-end">

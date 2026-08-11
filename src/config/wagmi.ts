@@ -27,7 +27,7 @@ export const arcTestnet = defineChain({
 
 export const walletConnectProjectId =
   (import.meta.env.VITE_WALLETCONNECT_PROJECT_ID as string) ||
-  '044601f652123a436438a53e95f86a53';
+  '338d60b195ccdb23c3aed16cea41349f';
 
 const connectors = connectorsForWallets(
   [

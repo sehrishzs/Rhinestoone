@@ -4,7 +4,10 @@ export const ARC_TESTNET_CHAIN_ID = 5042002;
 
 export const RHINESTONE_CONTRACT_ADDRESS: `0x${string}` =
   (import.meta.env.VITE_RHINESTONE_CONTRACT_ADDRESS as `0x${string}`) ||
-  '0x71C39129f1e84C32128912345678901234563912';
+  '0x2cE9B69BdF095f75D92F15734cB4eE267637d311';
+
+export const ADMIN_WALLET_ADDRESS: `0x${string}` =
+  '0xe368bC2Ad3744714a4Eb318D1aC54A2f0194E0fa';
 
 export const TOKENS: Record<string, TokenInfo> = {
   ARC: {
